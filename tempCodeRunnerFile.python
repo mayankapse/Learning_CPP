@@ -1,0 +1,52 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.metrics import (
+    mean_squared_error, accuracy_score, confusion_matrix, classification_report, r2_score
+)
+from sklearn.preprocessing import LabelEncoder
+
+# Load dataset
+df = pd.read_csv("C:\\Users\\Mayank\\OneDrive\\Documents\\Datasets\\daily_adjusted_IBM.csv")
+df = df.drop(columns=['timestamp', 'volume'])
+
+# Features and target
+X = df.drop(columns=['close'])
+y = df['close']
+
+# Encode target variable for Logistic Regression
+label_encoder = LabelEncoder()
+y_class = label_encoder.fit_transform(y)
+
+# Split data for regression and classification
+X_train, X_test, y_train_reg, y_test_reg = train_test_split(X, y, test_size=0.2, random_state=42)
+_, _, y_train_class, y_test_class = train_test_split(X, y_class, test_size=0.2, random_state=42)
+
+# ---- Linear Regression ----
+lin_model = LinearRegression()
+lin_model.fit(X_train, y_train_reg)
+y_pred_reg = lin_model.predict(X_test)
+
+# Evaluate Linear Regression
+mse = mean_squared_error(y_test_reg, y_pred_reg)
+r2 = r2_score(y_test_reg, y_pred_reg)
+print("Linear Regression Evaluation:")
+print(f"Mean Squared Error (MSE): {mse}")
+print(f"R² Score: {r2}")
+
+# ---- Logistic Regression ----
+log_model = LogisticRegression(max_iter=1000)
+log_model.fit(X_train, y_train_class)
+y_pred_class = log_model.predict(X_test)
+
+# Evaluate Logistic Regression
+accuracy = accuracy_score(y_test_class, y_pred_class)
+conf_matrix = confusion_matrix(y_test_class, y_pred_class)
+class_report = classification_report(y_test_class, y_pred_class)
+
+print("\nLogistic Regression Evaluation:")
+print(f"Accuracy: {accuracy}")
+print("Confusion Matrix:")
+print(conf_matrix)
+print("Classification Report:")
+print(class_report)
